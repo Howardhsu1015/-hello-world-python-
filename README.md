@@ -8,7 +8,7 @@
 This program prints the text "Hello, World!"to the console. it's a classic introductory program for learning any programming language.
 ## How to run
 
-1.make sure you have python instaled on your system.
+1.make sure you have python installed on your system.
 2.dowmload or clone this repository.
 3.navigate to the directory containing the `hello_world.py` file in your terminal or command prompt.
 4.run the program using the command: `python hello_world.py`
