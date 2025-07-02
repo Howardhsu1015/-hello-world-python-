@@ -1,67 +1,75 @@
-# ai_exploration.md
-- **AI 平台**：Google Gemini
-- **編程環境**：Google Colab
-- **選擇原因**：
-  - Gemini 是 Google 推出的生成式 AI，介面直觀、回答速度快
-  - Colab 是線上 Python 編輯器，免安裝且支援即時執行程式碼
-### ✅ Prompt 1：請解釋什麼是 AI？
+# 安裝 Gemini 套件
+!pip install -q -U google-generativeai
 
-**AI 回覆：**  
-人工智慧（Artificial Intelligence，簡稱 AI）是一種讓機器模仿人類智慧行為的技術。它可以讓電腦執行理解語言、辨識影像、下棋、推薦內容等任務。AI 技術包含機器學習、深度學習與自然語言處理。簡單來說，AI 讓電腦「看得懂、聽得懂、能思考」。
+# 匯入函式庫
+import google.generativeai as genai
+from google.colab import userdata
+import os
+import time
 
----
+# 設定金鑰
+api_key = userdata.get('GEMINI_API_KEY')
 
-### ✅ Prompt 2：幫我寫一個 Python 程式，輸入一個整數陣列，輸出所有數字的總和，並解釋每一行的程式碼。
+if not api_key:
+    print("❌ 無法讀取 GEMINI_API_KEY，請先在左邊 🔑 輸入你的 API 金鑰")
+else:
+    print(f"🔑 已讀取金鑰（部分遮蔽）：{api_key[:4]}...{api_key[-4:]}")
+    genai.configure(api_key=api_key)
 
-**AI 回覆：**
+    # 選擇模型
+    MODEL_NAME = "models/gemini-1.5-flash"
+    model = genai.GenerativeModel(model_name=MODEL_NAME)
 
-```python
-# 定義一個函式來計算陣列總和
-def sum_array(nums):
-    total = 0  
-    for num in nums:  
-        total += num 
-    return total 
+    # Prompt 清單（原始 + 優化各 5 組）
+    prompt_pairs = [
+        (
+            "請幫我寫一段 Python 最好的入門方法",
+            "你是一位資深 Python 老師。請向從未寫過程式的高中生介紹如何入門學 Python，使用步驟教學，並搭配簡單範例。"
+        ),
+        (
+            "請解釋什麼是人工智慧",
+            "請一步步解釋什麼是人工智慧。從定義開始，接著說明運作方式，然後提供生活中的一個實例，最後說明它可能帶來的好處與挑戰。"
+        ),
+        (
+            "請簡單介紹永續發展是什麼",
+            "請為一份環境教育講義撰寫簡介，清楚介紹永續發展的意義、三大面向，並用 100 字左右的說明讓 18 歲學生理解。"
+        ),
+        (
+            "什麼是氣候變遷？",
+            "假設你正在對高中學生解釋氣候變遷，請用精確的語言和生活例子說明原因與影響。"
+        ),
+        (
+            "人工智慧未來會取代人類嗎？",
+            "請用中立語氣，探討人工智慧是否可能取代人類的部分工作，並分別列出樂觀與悲觀觀點。"
+        ),
+    ]
 
-# 測試陣列
-numbers = [1, 2, 3, 4, 5]
+    # 發送 prompt 並儲存回應
+    for idx, (original_prompt, optimized_prompt) in enumerate(prompt_pairs, 1):
+        for version, prompt in zip(["original", "optimized"], [original_prompt, optimized_prompt]):
+            print(f"\n🟡 正在處理第 {idx} 組（{version}）...")
 
-# 印出總和
-print("總和為：", sum_array(numbers
+            try:
+                time.sleep(2)
+                response = model.generate_content(prompt)
+                answer = response.text
 
-### ✅ Prompt 3：請幫我解釋「Prompt Engineering」是什麼？
+                # 顯示回應
+                print(f"✅ 回應內容：\n{answer[:300]}...\n")
 
-**AI 回覆：**  
-Prompt Engineering（提示工程）是設計給 AI 的輸入文字提示（prompt）的一種技巧。透過調整語句的方式、提供明確的上下文、加入範例等方式，我們可以讓 AI 更精準地理解我們的需求，並產生符合預期的回應。這項技巧對於與像 ChatGPT、Gemini 這類語言模型互動時特別重要。
+                # 儲存為檔案
+                filename = f"response_{idx}_{version}.txt"
+                with open(filename, "w", encoding="utf-8") as f:
+                    f.write(f"Prompt:\n{prompt}\n\nResponse:\n{answer}")
 
----
+                print(f"📄 已儲存：{filename}")
 
-### ✅ Prompt 4：請幫我列出 AI 在電機工程領域的應用
+            except Exception as e:
+                print(f"❌ 發生錯誤：{e}")
 
-**AI 回覆：**  
-AI 在電機工程領域的應用包含：
-- 自動化控制系統（如智慧工廠）
-- 電力系統負載預測與能源管理（智慧電網）
-- 機器人路徑規劃與感測器資料處理
-- 電子設計自動化（EDA）工具優化
-- 故障預測與維修（Predictive Maintenance）
-
----
-
-### ✅ Prompt 5：幫我解釋 LeetCode 題目 Two Sum 並用 Python 寫出解法
-
-**AI 回覆：**  
-**題目：**  
-給定一個整數陣列 `nums` 和一個目標數字 `target`，請找出陣列中兩個數字，其總和等於 `target`，並回傳他們的索引。
-
-**Python 解法：**
-
-```python
-def twoSum(nums, target):
-    hashmap = {}  
-    for i, num in enumerate(nums):
-        complement = target - num 
-        if complement in hashmap:
-            return [hashmap[complement], i] 
-        hashmap[num] = i
-![image](https://github.com/user-attachments/assets/cc519d0f-d0ad-496e-93f4-4e05f8d90530)
+編號	類型	      Prompt 摘要	Gemini 回覆摘要
+1	原始	         Python 入門	        簡單一句描述 + 函數說明
+1	優化	        老師教高中生入門 Python	   條列式步驟 + 範例程式 + 解釋明確
+2	原始	         什麼是 AI	定義 AI 的一句話
+2	優化	         分步說明 AI + 舉例	明確定義 → 應用 → 影響 → 優缺點
+我針對 5 組提示進行了 prompt 優化，發現原始的 prompt 較為簡單，不能完整表達prompt的意思，導致 AI 回覆內容有時候過於籠統。而在優化提示中，透過加入角色、受眾、任務說明等方式，能顯著提升 AI 輸出的結構、深度與貼近需求的程度。特別是 Chain-of-Thought 技術在概念解釋型題目中效果明顯，能讓模型逐步產生更具邏輯性的內容。整體來說，優化 prompt 大幅提升了 AI 的可用性與內容品質。
